@@ -41,3 +41,28 @@ passport.use('login', new localStrategy(//configuración de estrategía local pa
     }
 ));
 
+passport.use('changePassword', new localStrategy(
+    {
+        usernameField: 'email',
+        passwordField: 'password',
+        passReqToCallback: true
+   },
+    async(req, email, password, done)=>{
+        try{
+            const user = await UserModel.findOne({email});
+            const newPassword = req.body.new_password;
+            if(!user)
+                return done(null, false, {message:'Incorrect user or password'});
+            if(!(await bcrypt.compare(password, user.password)))
+                return done(null, false, {message:'Incorrect user or password'});
+            if((await bcrypt.compare(newPassword, user.password)))
+                return done(null, user, {message:'New password cannot be de same as old password'});
+            const newHash = await bcrypt.hash(newPassword, 10);
+            await UserModel.updateOne({_id: user._id}, {password: newHash});
+            return done(null, user, {message:'Password has changed!'});
+        }catch(error){
+            console.log(error);
+            return done(null, error, {message:'Error! ' + error});
+        }
+    }
+));

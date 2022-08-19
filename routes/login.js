@@ -1,6 +1,4 @@
-const { response } = require('express')
 const express = require('express')
-const { JsonWebTokenError } = require('jsonwebtoken')
 const router = express.Router()
 const passport = require('passport')
 const tokenator = require('../auth/authenticateToken')//modulo de manejo de tokens jwt
@@ -38,8 +36,12 @@ router.post('/login/refresh', tokenator.validateRefresh, (request, response)=>{/
     console.log('refresh token')
 })
 
-// router.put('/0001/client', , async(request, response, next)=>{//servicio de cambio de contraseña //TODO
+router.post('/password', passport.authenticate('changePassword', {session:false}), async(request, response)=>{//servicio de cambio de contraseña
+    console.log('Attempted to change password');
+})
 
-// })
+router.post('/password/recovery', async(request, response)=>{//servicio de olvido de contraseña
+    console.log('Send email to user for password change site');
+})
 
 module.exports = router;
